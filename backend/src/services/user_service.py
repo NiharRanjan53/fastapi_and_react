@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
 from src.crud import crud_user
-from src.core.security import get_hashed_password, verify_password, create_access_token
+from src.core.security import get_hashed_password, verify_password, create_access_token, decode_access_token
 from src.schemas.auth import UserData, LoginInfo
 
 async def register_user(db: AsyncSession, user_data: UserData):
@@ -38,3 +38,25 @@ async def login_user(db: AsyncSession, login_info: LoginInfo):
         )
     token = create_access_token({"sub": user.email})
     return token
+
+async def resolve_user_from_token(token: str, db: AsyncSession):
+    payload = decode_access_token(token)
+    if not payload or "sub" not in payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    user = await crud_user.get_user_by_email(db, payload["sub"])
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    if hasattr(user, "is_active") and not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user"
+        )
+    return user

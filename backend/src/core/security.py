@@ -21,3 +21,12 @@ def create_access_token(data: Dict[str, Any], expires_minutes: Optional[int] = N
     )
     to_encode.update({"exp": expire, "iat": datetime.datetime.now(datetime.timezone.utc)})
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+
+def decode_access_token(token: str) -> Dict[str, Any]:
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise Exception("Token has expired")
+    except jwt.JWTError:
+        raise Exception("Invalid token")
