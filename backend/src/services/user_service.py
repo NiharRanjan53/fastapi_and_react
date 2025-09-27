@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
 from src.crud import crud_user
-from src.core.security import get_hashed_password
-from src.schemas.auth import UserData
+from src.core.security import get_hashed_password, verify_password
+from src.schemas.auth import UserData, LoginInfo
 
 async def register_user(db: AsyncSession, user_data: UserData):
     existing = await crud_user.get_user_by_email(db, user_data.email)
@@ -23,3 +23,12 @@ async def register_user(db: AsyncSession, user_data: UserData):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Database error while creating user"
         )
+    
+async def login_user(db: AsyncSession, login_info: LoginInfo):
+    user = await crud_user.get_user_by_email(db, login_info.email)
+    if not user or not verify_password(login_info.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    return {"email": user.email, "message": "Login successful"}
