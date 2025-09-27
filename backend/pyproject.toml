@@ -5,8 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "aiosqlite>=0.21.0",
+    "bcrypt>=4.0.0",
     "fastapi>=0.117.1",
+    "passlib[argon2,bcrypt]>=1.7.4",
     "pydantic-settings>=2.11.0",
+    "pydantic[email]>=2.11.9",
     "pydentic>=0.0.1.dev3",
+    "sqlalchemy>=2.0.43",
     "uvicorn>=0.37.0",
 ]

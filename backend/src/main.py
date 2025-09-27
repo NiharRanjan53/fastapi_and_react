@@ -7,6 +7,10 @@ def create_app() -> FastAPI:
 
     register_routes(app)
 
+    @app.get("/")
+    async def root():
+        return {"message": "Hello — API at /api/v1"}
+
     return  app
 
 app = create_app()
