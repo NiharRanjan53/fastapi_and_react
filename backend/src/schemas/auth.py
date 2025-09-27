@@ -34,3 +34,7 @@ class LoginInfo(BaseModel):
 class LoginResponse(BaseModel):
     email: EmailStr
     message: str
+
+class TockenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"

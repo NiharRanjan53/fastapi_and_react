@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
 from src.crud import crud_user
-from src.core.security import get_hashed_password, verify_password
+from src.core.security import get_hashed_password, verify_password, create_access_token
 from src.schemas.auth import UserData, LoginInfo
 
 async def register_user(db: AsyncSession, user_data: UserData):
@@ -29,6 +29,12 @@ async def login_user(db: AsyncSession, login_info: LoginInfo):
     if not user or not verify_password(login_info.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password"
+            detail="Invalid credentials"
         )
-    return {"email": user.email, "message": "Login successful"}
+    if hasattr(user, "is_active") and not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user"
+        )
+    token = create_access_token({"sub": user.email})
+    return token

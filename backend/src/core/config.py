@@ -1,4 +1,3 @@
-# backend/src/core/config.py
 from pydantic_settings import BaseSettings
 from pydantic import AnyUrl
 from typing import List
