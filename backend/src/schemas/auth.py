@@ -25,8 +25,8 @@ class UserResponse(BaseModel):
     is_active: bool
 
     class Config:  # Config class to enable ORM mode for SQLAlchemy compatibility
-        orm_mode = True 
-
+        # orm_mode = True 
+        from_attributes = True
 class LoginInfo(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=7, max_length=15)
